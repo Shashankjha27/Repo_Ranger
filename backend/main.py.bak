@@ -1,0 +1,56 @@
+import uuid
+import hashlib
+import subprocess
+import os
+from fastapi import FastAPI, HTTPException
+from pydantic  import BaseModel
+from github_validator import validate_github_url, InvalidGitHUbURLError
+
+app = FastAPI()
+# @app.get("/")
+# def home():
+#     return {"message": "Repo Ranger API"}
+# @app.get("/hello")
+# def agn():
+#     return {"Hello": "Again"}
+
+BASE_DIR = "cloned_repos"
+os.makedirs(BASE_DIR, exist_ok=True)
+
+class CloneRequest(BaseModel):
+    github_url: str
+
+@app.post("/clone")
+def clone_repo(request: CloneRequest):
+
+    try:
+        parsed = validate_github_url(request.github_url)
+    except InvalidGitHUbURLError as e:
+        raise HTTPException(status_code = 422, detail = str(e))
+
+    clone_url = parsed.clone_url
+
+    session_id = str(uuid.uuid4())
+    url_hash = hashlib.sha256 (request.github_url.encode()).hexdigest()[:12]
+    folder_name = f"{session_id}__{url_hash}"
+    target_path = os.path.join(BASE_DIR, folder_name)
+
+
+
+    result = subprocess.run(
+        ["git", "clone", clone_url, target_path],
+        capture_output=True,
+        text=True
+    )
+    if result.returncode != 0:
+        raise HTTPException (status_code=400, detail=result.stderr)
+    return {
+        "session_id" : session_id,
+        "url_hash" : url_hash,
+        "folder" : target_path,
+        "owner" :  parsed.owner,
+        "repo" : parsed.repo,
+        "url_kind" : parsed.kind,
+        "branch" : parsed.branch,
+        "message" : "Repository  cloned successfully"
+    }

@@ -22,8 +22,8 @@ class ParsedGitHubURL:
              f"repo={self.repo}{branch_info})"
         )
     
-_owner=r"(?P<owner>[A-Za-z0-9](?:[A-Za-z0-9\-]{0,37}[A-Za-z0-9])?)"   
-_repo=r"(?P<repo>[A-Za-z0-9_.\-]{1,100})" 
+_OWNER=r"(?P<owner>[A-Za-z0-9](?:[A-Za-z0-9\-]{0,37}[A-Za-z0-9])?)"   
+_REPO=r"(?P<repo>[A-Za-z0-9_.\-]{1,100})" 
 
 _PATTERNS: list[tuple[UrlKind,re.Pattern]] = [
     (
