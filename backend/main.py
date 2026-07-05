@@ -3,7 +3,7 @@ from pydantic import BaseModel
 from requests import HTTPError
 
 from backend.chunker import chunk_all
-from backend.separator import RepoBucket, process_files
+from backend.separator import process_files
 from backend.services.github_fetcher import fetch_repo
 from backend.validator import InvalidGitHubURLError, validate_github_url
 
