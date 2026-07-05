@@ -1,40 +1,64 @@
-import uuid
-import hashlib
-import subprocess
-import os
 from fastapi import FastAPI, HTTPException
-from pydantic  import BaseModel
+from pydantic import BaseModel
+from requests import HTTPError
+
+from backend.chunker import chunk_all
+from backend.separator import RepoBucket, process_files
+from backend.services.github_fetcher import fetch_repo
+from backend.validator import InvalidGitHubURLError, validate_github_url
 
 app = FastAPI()
-# @app.get("/")
-# def home():
-#     return {"message": "Repo Ranger API"}
-# @app.get("/hello")
-# def agn():
-#     return {"Hello": "Again"}
 
-BASE_DIR = "cloned_repos"
-os.makedirs(BASE_DIR, exist_ok=True)
 
-class CloneRequest(BaseModel):
+class AnalyzeRequest(BaseModel):
     github_url: str
+    github_token: str | None = None
 
-@app.post("/clone")
-def clone_repo(request: CloneRequest):
-    session_id = str(uuid.uuid4())
-    url_hash = hashlib.sha256 (request.github_url.encode()).hexdigest()[:12]
-    folder_name = f"{session_id}__{url_hash}"
-    target_path = os.path.join(BASE_DIR, folder_name)
-    result = subprocess.run(
-        ["git", "clone", request.github_url, target_path],
-        capture_output=True,
-        text=True
+
+@app.post("/analyze")
+def analyze_repo(request: AnalyzeRequest):
+    try:
+        parsed = validate_github_url(request.github_url)
+    except InvalidGitHubURLError as e:
+        raise HTTPException(status_code=400, detail=str(e))
+
+    try:
+        repo_data = fetch_repo(parsed.owner, parsed.repo, parsed.branch, request.github_token)
+    except HTTPError as e:
+        status = e.response.status_code if e.response is not None else 502
+        raise HTTPException(status_code=status, detail=f"GitHub API error {status}: {e}")
+
+    bucketed = process_files(repo_data.files)
+
+    chunks = chunk_all(
+        {
+            "files": [
+                {
+                    "content": f.content,
+                    "file_type": f.extension or "",
+                    "path": f.path,
+                    "relative_path": f.relative_path,
+                    "category": f.category,
+                    "size_bytes": f.size_bytes,
+                    "is_binary": f.is_binary,
+                    "binary_flag": f.binary_flag,
+                }
+                for f in bucketed.all_files
+            ]
+        }
     )
-    if result.returncode != 0:
-        raise HTTPException (status_code=400, detail=result.stderr)
+
     return {
-        "session_id" : session_id,
-        "url_hash" : url_hash,
-        "folder" : target_path,
-        "message" : "Repository  cloned successfully"
+        "owner": parsed.owner,
+        "repo": parsed.repo,
+        "branch": parsed.branch,
+        "total_files": bucketed.total_files,
+        "categories": {
+            "code": len(bucketed.code),
+            "config": len(bucketed.config),
+            "docs": len(bucketed.docs),
+            "binary": len(bucketed.binary),
+            "other": len(bucketed.other),
+        },
+        "chunks": chunks,
     }

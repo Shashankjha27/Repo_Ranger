@@ -1,0 +1,180 @@
+
+<p align="center">
+  <h1>🏗️ Repo Ranger — System Design</h1>
+  <p><em>Architecture, data flow, and phased implementation roadmap</em></p>
+</p>
+
+---
+
+## 🎯 Design Philosophy
+
+```
+┌────────────────────────────────────────────────────┐
+│          SCOPE-BOUNDED INTELLIGENCE                │
+│                                                    │
+│  Every answer must be traceable to a line of       │
+│  code in the repo or an explicit dependency.       │
+│  No hallucination beyond the codebase.             │
+└────────────────────────────────────────────────────┘
+```
+
+---
+
+## 🧱 System Architecture
+
+### High-Level Data Flow
+
+```
+                          STAGE 1                        STAGE 2                     STAGE 3
+                    ┌──────────────────┐          ┌──────────────────┐          ┌──────────────────┐
+  User ──► URL      │   INGESTION      │          │   PROCESSING     │          │   QUERY          │
+                    │                  │          │                  │          │                  │
+                    │  validator.py    │          │  separator.py    │          │  LLM Q&A Engine  │
+                    │       │          │          │       │          │          │       │          │
+                    │       ▼          │          │       ▼          │          │       ▼          │
+                    │  github_fetcher  │          │  chunker.py      │          │  TUI (Textual)   │
+                    │                  │          │                  │          │                  │
+                    │  ◄─ in memory ─► │          │  ▲ token budget  │          │  scope filter    │
+                    └──────────────────┘          └──────────────────┘          └──────────────────┘
+```
+
+### Component Diagram
+
+```ascii
+┌─────────────┐     ┌──────────────┐     ┌──────────────┐     ┌─────────────┐     ┌──────────────┐
+│   Client    │────►│  FastAPI     │────►│  Validator   │────►│  Fetcher    │────►│  Separator   │
+│  (curl/TUI) │     │  main.py     │     │  URL parser  │     │  GitHub API │     │  Categorizer │
+└─────────────┘     └──────────────┘     └──────────────┘     └─────────────┘     └──────┬───────┘
+                                                                                         │
+                                                                                         ▼
+┌─────────────┐     ┌──────────────┐     ┌──────────────┐                               │
+│   Output    │◄────│  LLM Engine  │◄────│   Chunker    │◄───────────────────────────────┘
+│  / Response │     │  (scope-box) │     │  chunker.py  │
+└─────────────┘     └──────────────┘     └──────────────┘
+```
+
+---
+
+## 📦 Data Models
+
+```ascii
+ParsedGitHubURL                  RepoData
+┌──────────────────┐            ┌──────────────────────┐
+│ raw: str         │            │ owner: str           │
+│ kind: UrlKind    │            │ repo: str            │
+│ owner: str       │            │ branch: str          │
+│ repo: str        │            │ default_branch: str  │
+│ branch: str|None │            │ files: list[dict]    │
+│ clone_url: str   │            └──────────────────────┘
+└──────────────────┘
+
+FileEntry                        RepoBucket
+┌──────────────────────┐        ┌──────────────────────┐
+│ path: str            │        │ root: str            │
+│ relative_path: str   │        │ code: list[FileEntry]│
+│ category: Category   │        │ config: list[FileEntry]│
+│ extension: str       │        │ docs: list[FileEntry]│
+│ size_bytes: int      │        │ binary: list[FileEntry]│
+│ is_binary: bool      │        │ other: list[FileEntry]│
+│ content: str         │        │ skipped_dirs: list   │
+│ binary_flag: str     │        └──────────────────────┘
+└──────────────────────┘
+```
+
+---
+
+## 🗺️ Phased Implementation Roadmap
+
+### Phase 1 — Core Pipeline ✅ *(Current)*
+
+| Component | Status | Description |
+|-----------|--------|-------------|
+| `validator.py` | ✅ Done | Regex-based GitHub URL parser (HTTPS, SSH, API formats) |
+| `github_fetcher.py` | ✅ Done | Fetches repo tree + file contents via GitHub API, fully in-memory |
+| `separator.py` | ✅ Done | `process_repo()` walks filesystem; categorizes by extension/name |
+| `chunker.py` | 🟡 Needs Fix | Structure-aware + token-budget chunking; has a logic bug in `chunk_file` |
+| `main.py` | 🔄 Wiring | Currently minimal — needs to connect fetcher → separator → chunker |
+
+**Goals for Phase 1:**
+```
+input:  GitHub URL
+output: {
+  "owner", "repo", "branch",
+  "total_files_fetched": N,
+  "categories": { code, config, docs, binary, other },
+  "total_chunks": N
+}
+```
+
+### Phase 2 — Repo-Scoped Q&A 🎯 *(Next)*
+
+| Component | Description |
+|-----------|-------------|
+| **Scope Enforcer** | Build a context window that only includes chunks from the target repo + dependency metadata |
+| **Dependency Parser** | Parse `requirements.txt`, `package.json`, `go.mod`, `Cargo.toml` etc. to know what libraries the repo uses |
+| **LLM Orchestrator** | Send chunk-grounded queries to an LLM with strict system prompts banning out-of-scope answers |
+| **Query Router** | `POST /query` endpoint that accepts a question and returns a repo-grounded answer |
+
+**Key constraint:**
+```python
+# Pseudocode for the scoping rule
+ALLOWED_SOURCES = repo_chunks + dependency_metadata
+if any(source not in ALLOWED_SOURCES for source in llm_response_sources):
+    reject("Answer references content outside the repository")
+```
+
+### Phase 3 — TUI (Terminal User Interface) 🖥️ *(Future)*
+
+| Component | Description |
+|-----------|-------------|
+| **Textual App** | Rich terminal UI using [Textual](https://textual.textualize.io/) |
+| **Repo Explorer** | Navigable tree view of repo files with category badges |
+| **Chunk Viewer** | Browse individual chunks with token counts and strategy labels |
+| **Q&A Panel** | Ask questions inline, see answers with source-file citations |
+| **Session History** | Persist analysis sessions locally for later review |
+
+```
+┌──────────────────────────────────────────────────────────┐
+│  Repo Ranger                                     [X]    │
+├────────────────────────┬─────────────────────────────────┤
+│  📁 repo structure     │  💬 Q&A Panel                  │
+│                        │                                 │
+│  src/                  │  Q: Why is this function async? │
+│   ├─ main.py          │                                 │
+│   ├─ utils/           │  A: From utils/fetcher.py:47    │
+│   │  └─ fetcher.py    │  The API client uses asyncio    │
+│   └─ models.py        │  to handle concurrent requests. │
+│                        │                                 │
+│  tests/                │                                 │
+│   └─ test_main.py     │                                 │
+│                        │                                 │
+│  [code] [config] [docs]│  [Ask a question...]          │
+├────────────────────────┴─────────────────────────────────┤
+│  Stats: 142 files · 1,234 chunks · 45,678 tokens        │
+└──────────────────────────────────────────────────────────┘
+```
+
+---
+
+## 🔮 Key Design Decisions
+
+| Decision | Rationale |
+|----------|-----------|
+| **No `git clone`** | Avoids disk I/O, works in serverless/constrained environments, faster startup |
+| **In-memory pipeline** | Simpler state management, easy to parallelize, no cleanup needed |
+| **tiktoken for budgeting** | Industry-standard tokenization matching OpenAI models; predictable chunk sizes |
+| **AST-based Python chunking** | Preserves function/class boundaries instead of arbitrary splits |
+| **FastAPI over Flask** | Native async support, auto-docs, Pydantic integration out of the box |
+
+---
+
+## 🧪 Potential Issues & Mitigations
+
+| Issue | Risk | Mitigation |
+|-------|------|------------|
+| **GitHub API rate limits** | High | Support tokens via header; cache results per session |
+| **Large repos (>300k entries)** | Medium | Tree endpoint truncates — need pagination or shallow-first strategy |
+| **Binary file detection** | Low | Currently extension-based; could add magic byte sniffing |
+| **Token costs for large repos** | Medium | Allow user to filter by category (e.g., "code only") |
+| **LLM context window overflow** | Medium | Implement retrieval (RAG) over chunks instead of dumping all |
+| **Chunker bug (dead code path)** | Low | `chunk_file` has unreachable branches — needs refactor |
