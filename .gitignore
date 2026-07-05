@@ -1,4 +1,6 @@
 venv/
 __pycache__/
 *.pyc
-.envpath/to/large_file
+.env
+progress.md
+system_design.md

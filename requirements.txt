@@ -6,14 +6,17 @@ charset-normalizer==3.4.7
 click==8.3.1
 fastapi==0.135.1
 h11==0.16.0
+httpx==0.28.1
 idna==3.11
 pydantic==2.12.5
 pydantic_core==2.41.5
 regex==2026.5.9
 requests==2.34.2
+ruff==0.15.20
 starlette==0.52.1
 tiktoken==0.13.0
 typing-inspection==0.4.2
 typing_extensions==4.15.0
 urllib3==2.7.0
 uvicorn==0.42.0
+pytest==9.1.1

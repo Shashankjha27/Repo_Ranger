@@ -21,16 +21,16 @@ class ParsedGitHubURL:
              f"ParsedGitHubURL(kind={self.kind},owner={self.owner},"
              f"repo={self.repo}{branch_info})"
         )
-    
-_OWNER=r"(?P<owner>[A-Za-z0-9](?:[A-Za-z0-9\-]{0,37}[A-Za-z0-9])?)"   
-_REPO=r"(?P<repo>[A-Za-z0-9_.\-]{1,100})" 
+
+_OWNER=r"(?P<owner>[A-Za-z0-9](?:[A-Za-z0-9\-]{0,37}[A-Za-z0-9])?)"
+_REPO=r"(?P<repo>[A-Za-z0-9_.\-]{1,100})"
 
 _PATTERNS: list[tuple[UrlKind,re.Pattern]] = [
     (
         "api",
         re.compile(
             rf"https://api\.github\.com/repos/{_OWNER}/{_REPO}(?:\.git)?(?:/.*)?$",
-            re.IGNORECASE,        
+            re.IGNORECASE,
         ),
     ),
     (
@@ -39,14 +39,14 @@ _PATTERNS: list[tuple[UrlKind,re.Pattern]] = [
             rf"^https://github\.com/{_OWNER}/{_REPO}"
             r"(?:\.git)?"
             r"(?:/(?:tree|blob|commits?)/(?P<branch>[^/?#\s]+))?(?:[/?#].*)?$",
-            re.IGNORECASE,        
+            re.IGNORECASE,
         ),
     ),
     (
         "ssh",
         re.compile(
             rf"^git@github\.com:{_OWNER}/{_REPO}(?:\.git)?(?:/.*)?$",
-            re.IGNORECASE,        
+            re.IGNORECASE,
         ),
     ),
     (
@@ -66,7 +66,7 @@ def validate_github_url(raw: str) -> ParsedGitHubURL:
 
     if not url:
         raise InvalidGitHubURLError("URL must not be empty.")
-    
+
     for kind,pattern in _PATTERNS:
         m = pattern.match(url)
         if m:
@@ -91,9 +91,9 @@ def validate_github_url(raw: str) -> ParsedGitHubURL:
 
 def is_valid_github_url(raw: str)-> bool:
     try:
-        validate_github_url(raw) 
+        validate_github_url(raw)
         return True
     except InvalidGitHubURLError:
         return False
-          
-     
+
+
