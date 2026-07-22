@@ -347,10 +347,17 @@ def _read_content(path: Path) -> tuple[str, str]:
         return "", f"mime:{mime}"  # FIXED
 
     try:
-        content = path.read_text(encoding="utf-8", errors="replace")
-        return content, ""
+        raw = path.read_bytes()
     except Exception as exc:
         return "", f"read_error:{exc}"
+
+    if b"\x00" in raw[:8192]:
+        return "", "binary_content:null_bytes"
+
+    try:
+        return raw.decode("utf-8"), ""
+    except UnicodeDecodeError:
+        return "", "binary_content:decode_error"
 
 
 def process_repo(root_dir: str, max_file_bytes: int = MAX_FILE_BYTES) -> RepoBucket:

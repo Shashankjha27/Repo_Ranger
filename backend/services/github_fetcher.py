@@ -5,36 +5,12 @@ from urllib.parse import quote
 
 import requests
 
+from backend.separator import _BINARY_EXTS, MAX_FILE_BYTES
+
 logger = logging.getLogger(__name__)
 
 GITHUB_API_BASE = "https://api.github.com"
 RAW_BASE = "https://raw.githubusercontent.com"
-
-_BINARY_EXTS = frozenset(
-    {
-        ".jpg",
-        ".jpeg",
-        ".png",
-        ".gif",
-        ".bmp",
-        ".svg",
-        ".webp",
-        ".pdf",
-        ".doc",
-        ".docx",
-        ".xls",
-        ".xlsx",
-        ".ppt",
-        ".pptx",
-        ".zip",
-        ".tar",
-        ".gz",
-        ".bz2",
-        ".xz",
-    }
-)
-
-MAX_FILE_BYTES = 500 * 1024
 
 
 @dataclass
