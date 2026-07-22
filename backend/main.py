@@ -9,12 +9,9 @@ from pydantic import BaseModel
 from requests import HTTPError
 
 from backend.chunker import chunk_all
-<<<<<<< HEAD
-=======
 from backend.dependency_parser import parse_dependencies
 from backend.llm.provider import LLMProvider
 from backend.scope_enforcer import build_context
->>>>>>> dev
 from backend.separator import process_files
 from backend.services.github_fetcher import fetch_repo
 from backend.validator import InvalidGitHubURLError, validate_github_url
