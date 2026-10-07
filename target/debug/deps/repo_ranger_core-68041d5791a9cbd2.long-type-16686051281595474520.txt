@@ -1,0 +1,3 @@
+fn(*const TSLanguage) -> tree_sitter::Language {tree_sitter::Language}
+fn(*const TSLanguage) -> tree_sitter::Language {tree_sitter::Language}: From<tree_sitter_language::LanguageFn>
+Into<fn(*const TSLanguage) -> tree_sitter::Language {tree_sitter::Language}>

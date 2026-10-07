@@ -1,0 +1,9 @@
+/home/shashank/Repo_Ranger/target/debug/deps/repo_ranger_core-0527c375f97a1733.d: crates/repo_ranger_core/src/lib.rs crates/repo_ranger_core/src/merkle.rs crates/repo_ranger_core/src/tarball.rs
+
+/home/shashank/Repo_Ranger/target/debug/deps/librepo_ranger_core-0527c375f97a1733.rmeta: crates/repo_ranger_core/src/lib.rs crates/repo_ranger_core/src/merkle.rs crates/repo_ranger_core/src/tarball.rs
+
+crates/repo_ranger_core/src/lib.rs:
+crates/repo_ranger_core/src/merkle.rs:
+crates/repo_ranger_core/src/tarball.rs:
+
+# env-dep:CARGO_PKG_VERSION=0.1.0
