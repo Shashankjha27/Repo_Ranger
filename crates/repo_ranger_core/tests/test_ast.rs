@@ -145,7 +145,7 @@ pub fn valid_two() -> i32 { 100 }
 
 #[test]
 fn test_rayon_batch_compression_multi_language() {
-    let files = vec![
+    let files = [
         ("src/main.rs", "fn main() { println!(\"hello\"); }"),
         ("app.py", "def run():\n    print('run')\n"),
         ("index.ts", "function start(): void { console.log('start'); }"),
