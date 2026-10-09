@@ -48,14 +48,14 @@ impl CodeDatabase {
                 kind TEXT NOT NULL,
                 signature TEXT NOT NULL,
                 start_line INTEGER NOT NULL,
-                end_line INTEER NOT NULL
+                end_line INTEGER NOT NULL
             );
-            CREATE INDEX idx_symbols_name ON symbold(name);
+            CREATE INDEX idx_symbols_name ON symbols(name);
 
-            CREATE VIRTUAL TABLE fts_coode USING fts5(
+            CREATE VIRTUAL TABLE fts_code USING fts5(
                 file_path,
                 content,
-                tokensize= \"unicode61 tokenchars '_$'\"
+                tokenize = \"unicode61 tokenchars '_$'\"
             );",
         )?;
 
@@ -97,7 +97,7 @@ impl CodeDatabase {
         }
 
         let mut stmt = self.conn.prepare_cached(
-            "SELECT file_path, snipppet(fts_code, 1, '<b>', '</b>', '...', 10), bm25(fts_code) \
+            "SELECT file_path, snippet(fts_code, -1, '<b>', '</b>', '...', 10), bm25(fts_code) \
             FROM fts_code \
             WHERE fts_code MATCH ?1 \
             ORDER BY bm25(fts_code) \
@@ -151,7 +151,7 @@ fn sanitize_query(query: &str) -> String {
         .split_whitespace()
         .filter(|w| !w.is_empty())
         .map(|term| {
-            let escaped = term.replace("", "\"\"");
+            let escaped = term.replace('"', "\"\"");
             format!("\"{}\"", escaped)
         })
         .collect();
