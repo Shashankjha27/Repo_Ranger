@@ -1,6 +1,7 @@
 use pyo3::prelude::*;
 
 pub mod ast;
+pub mod db;
 pub mod merkle;
 pub mod tarball;
 

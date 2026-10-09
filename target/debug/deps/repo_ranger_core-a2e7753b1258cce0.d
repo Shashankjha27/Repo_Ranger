@@ -1,9 +1,10 @@
-/home/shashank/Repo_Ranger/target/debug/deps/repo_ranger_core-a2e7753b1258cce0.d: crates/repo_ranger_core/src/lib.rs crates/repo_ranger_core/src/ast.rs crates/repo_ranger_core/src/merkle.rs crates/repo_ranger_core/src/tarball.rs
+/home/shashank/Repo_Ranger/target/debug/deps/repo_ranger_core-a2e7753b1258cce0.d: crates/repo_ranger_core/src/lib.rs crates/repo_ranger_core/src/ast.rs crates/repo_ranger_core/src/db.rs crates/repo_ranger_core/src/merkle.rs crates/repo_ranger_core/src/tarball.rs
 
-/home/shashank/Repo_Ranger/target/debug/deps/librepo_ranger_core-a2e7753b1258cce0.rmeta: crates/repo_ranger_core/src/lib.rs crates/repo_ranger_core/src/ast.rs crates/repo_ranger_core/src/merkle.rs crates/repo_ranger_core/src/tarball.rs
+/home/shashank/Repo_Ranger/target/debug/deps/librepo_ranger_core-a2e7753b1258cce0.rmeta: crates/repo_ranger_core/src/lib.rs crates/repo_ranger_core/src/ast.rs crates/repo_ranger_core/src/db.rs crates/repo_ranger_core/src/merkle.rs crates/repo_ranger_core/src/tarball.rs
 
 crates/repo_ranger_core/src/lib.rs:
 crates/repo_ranger_core/src/ast.rs:
+crates/repo_ranger_core/src/db.rs:
 crates/repo_ranger_core/src/merkle.rs:
 crates/repo_ranger_core/src/tarball.rs:
 
