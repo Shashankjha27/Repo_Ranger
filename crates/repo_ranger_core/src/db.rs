@@ -144,6 +144,18 @@ impl CodeDatabase {
         }
         Ok(records)
     }
+
+    pub fn conn(&self) -> &Connection {
+        &self.conn
+    }
+
+    pub fn conn_mut(&mut self) -> &mut Connection {
+        &mut self.conn
+    }
+
+    pub fn from_connection(connn: Connection) -> Self {
+        Self { conn }
+    }
 }
 
 fn sanitize_query(query: &str) -> String {

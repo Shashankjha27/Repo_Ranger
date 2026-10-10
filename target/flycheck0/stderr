@@ -1,2 +1,6 @@
+   Compiling pyo3-ffi v0.29.2
+   Compiling pyo3 v0.29.2
     Checking repo_ranger_core v0.1.0 (/home/shashank/Repo_Ranger/crates/repo_ranger_core)
-    Finished `dev` profile [unoptimized + debuginfo] target(s) in 0.21s
+error: could not compile `repo_ranger_core` (lib test) due to 2 previous errors; 7 warnings emitted
+warning: build failed, waiting for other jobs to finish...
+error: could not compile `repo_ranger_core` (lib) due to 2 previous errors; 7 warnings emitted
