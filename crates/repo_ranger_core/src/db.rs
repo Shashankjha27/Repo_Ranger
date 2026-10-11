@@ -153,7 +153,7 @@ impl CodeDatabase {
         &mut self.conn
     }
 
-    pub fn from_connection(connn: Connection) -> Self {
+    pub fn from_connection(conn: Connection) -> Self {
         Self { conn }
     }
 }
