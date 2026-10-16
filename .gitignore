@@ -10,3 +10,4 @@ old_backup/
 plan_ai
 .venv/
 .opencode
+target/
