@@ -35,7 +35,7 @@ fn test_stream_tarball_in_memory() {
             .append_data(
                 &mut header1,
                 "octocat-hello-world-abc1234/src/main.rs",
-                &file1_content.as_slice()[..],
+                file1_content.as_slice(),
             )
             .expect("Failed to append test file 1");
 
@@ -48,7 +48,7 @@ fn test_stream_tarball_in_memory() {
             .append_data(
                 &mut header2,
                 "octocat-hello-world-abc1234/package.json",
-                &file2_content.as_slice()[..],
+                file2_content.as_slice(),
             )
             .expect("Failed to append test file 2");
 
@@ -88,7 +88,7 @@ fn test_extract_valid_tarball_in_memory() {
             .append_data(
                 &mut header1,
                 "octocat-hello-world-abc1234/src/main.rs",
-                &file1_content.as_slice()[..],
+                file1_content.as_slice(),
             )
             .expect("Failed to append test file 1");
 
@@ -117,7 +117,7 @@ fn test_strip_path_traversal_attempts() {
         header.as_mut_bytes().as_mut_slice()[..path_bytes.len()].copy_from_slice(path_bytes);
         header.set_cksum();
         builder
-            .append(&header, &malicious_content.as_slice()[..])
+            .append(&header, malicious_content.as_slice())
             .expect("Failed to append traversal path");
 
         builder.finish().expect("Failed to finish tar archive");
@@ -140,10 +140,10 @@ fn test_early_exit_on_callback_error() {
         header.set_mode(0o644);
         header.set_cksum();
         builder
-            .append_data(&mut header, "repo/file1.rs", &content.as_slice()[..])
+            .append_data(&mut header, "repo/file1.rs", content.as_slice())
             .expect("Failed to append file 1");
         builder
-            .append_data(&mut header, "repo/file2.rs", &content.as_slice()[..])
+            .append_data(&mut header, "repo/file2.rs", content.as_slice())
             .expect("Failed to append file 2");
 
         builder.finish().expect("Failed to finish tar archive");
