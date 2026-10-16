@@ -130,7 +130,7 @@ impl AstEngine {
                 continue;
             };
             out.push_str(before);
-            out.push_str(&replacement);
+            out.push_str(replacement);
             cursor = end;
         }
         out.push_str(&source_str[cursor..]);
@@ -148,27 +148,19 @@ impl AstEngine {
     }
 }
 
-fn function_spec(lang: SupportedLanguage) -> (&'static [&'static str], &'static str) {
+fn function_replacement(lang: SupportedLanguage, kind: &str) -> Option<&'static str> {
     use SupportedLanguage as L;
-    match lang {
-        L::Rust => (&["function_item"], "{ ... }"),
-        L::Python => (&["function_definition"], "..."),
-        L::TypeScript | L::Tsx | L::JavaScript => (
-            &[
-                "function_declaration",
-                "method_definition",
-                "arrow_function",
-                "function",
-            ],
-            "{ ... }",
-        ),
-        L::Go => (&["function_declaration", "method_declaration"], "{ ... }"),
-        L::C | L::Cpp => (&["function_definition"], "{ ... }"),
-        L::Java => (
-            &["method_declaration", "constructor_declaration"],
-            "{ ... }",
-        ),
-        L::Unsupported => (&[], ""),
+    match (lang, kind) {
+        (L::Rust, "function_item") => Some("{ ... }"),
+        (L::Python, "function_definition") => Some("..."),
+        (
+            L::TypeScript | L::Tsx | L::JavaScript,
+            "function_declaration" | "method_definition" | "arrow_function" | "function",
+        ) => Some("{ ... }"),
+        (L::Go, "function_declaration" | "method_declaration") => Some("{ ... }"),
+        (L::C | L::Cpp, "function_definition") => Some("{ ... }"),
+        (L::Java, "method_declaration" | "constructor_declaration") => Some("{ ... }"),
+        _ => None,
     }
 }
 
@@ -177,9 +169,7 @@ fn collect_function_bodies_for_language(
     lang: SupportedLanguage,
     spans: &mut Vec<(usize, usize, &'static str)>,
 ) {
-    let (kinds, replacement) = function_spec(lang);
-
-    if kinds.contains(&node.kind()) {
+    if let Some(replacement) = function_replacement(lang, node.kind()) {
         if let Some(body) = node.child_by_field_name("body") {
             spans.push((body.start_byte(), body.end_byte(), replacement));
             return;
