@@ -165,7 +165,7 @@ fn extract_identifiers(s: &str) -> Vec<&str> {
             }
         } else if in_ident {
             in_ident = false;
-            if let Ok(ident) = std::str::from_utf8(&bytes[start..1]) {
+            if let Ok(ident) = std::str::from_utf8(&bytes[start..i]) {
                 identifiers.push(ident);
             }
         }
