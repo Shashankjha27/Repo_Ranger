@@ -49,7 +49,9 @@ fn test_bm25_ranking_order() {
         },
         IndexedFile {
             path: "src/high_relevance.rs".to_string(),
-            content: "fn token_parser() { let token = 1; let next_token = token; validate(token); }".to_string(),
+            content:
+                "fn token_parser() { let token = 1; let next_token = token; validate(token); }"
+                    .to_string(),
             symbols: vec![],
         },
     ];
@@ -69,17 +71,29 @@ fn test_fts5_syntax_safety_special_chars() {
 
     let files = [IndexedFile {
         path: "src/auth.py".to_string(),
-        content: "@app.route('/login')\ndef login():\n    token = request.headers.get('auth-token')".to_string(),
+        content:
+            "@app.route('/login')\ndef login():\n    token = request.headers.get('auth-token')"
+                .to_string(),
         symbols: vec![],
     }];
 
     db.index(&files).expect("Failed to index files");
 
     // Queries with characters that normally break FTS5 (@, -, ., quotes)
-    let queries = ["@app.route", "auth-token", "login()", "headers.get", "\"token\""];
+    let queries = [
+        "@app.route",
+        "auth-token",
+        "login()",
+        "headers.get",
+        "\"token\"",
+    ];
     for q in queries {
         let result = db.search(q, 10);
-        assert!(result.is_ok(), "Query '{}' triggered an FTS5 syntax error", q);
+        assert!(
+            result.is_ok(),
+            "Query '{}' triggered an FTS5 syntax error",
+            q
+        );
     }
 }
 

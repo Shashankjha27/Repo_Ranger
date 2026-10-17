@@ -1,7 +1,7 @@
-use repo_ranger_core::merkle::{hash_file, MerkleTree};
-use repo_ranger_core::tarball::stream_tarball_in_memory;
 use flate2::write::GzEncoder;
 use flate2::Compression;
+use repo_ranger_core::merkle::{hash_file, MerkleTree};
+use repo_ranger_core::tarball::stream_tarball_in_memory;
 use tar::Builder;
 use tar::Header;
 

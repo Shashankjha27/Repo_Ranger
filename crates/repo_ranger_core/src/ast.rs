@@ -69,6 +69,8 @@ pub struct CodeSymbol {
     pub end_line: usize,
 }
 
+type ParsedFile<'a> = (&'a str, Option<(tree_sitter::Tree, SupportedLanguage)>);
+
 pub struct AstEngine;
 
 impl AstEngine {
@@ -91,10 +93,8 @@ impl AstEngine {
             .map_err(|_| AstError::LanguageError)?;
         Ok(Some(parser))
     }
-    fn parse_file<'a>(
-        path: &str,
-        content: &'a [u8],
-    ) -> Result<(&'a str, Option<(tree_sitter::Tree, SupportedLanguage)>), AstError> {
+
+    fn parse_file<'a>(path: &str, content: &'a [u8]) -> Result<ParsedFile<'a>, AstError> {
         let source_str = std::str::from_utf8(content)?;
         let lang = SupportedLanguage::from_path(path);
 

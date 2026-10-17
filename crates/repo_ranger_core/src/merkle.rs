@@ -67,7 +67,7 @@ impl MerkleTree {
         let mut current: Vec<[u8; 32]> = sorted.into_iter().map(|f| f.hash).collect();
 
         while current.len() > 1 {
-            let mut next = Vec::with_capacity((current.len() + 1) / 2);
+            let mut next = Vec::with_capacity(current.len().div_ceil(2));
             for chunk in current.chunks(2) {
                 let mut hasher = Hasher::new();
                 hasher.update(&chunk[0]);
