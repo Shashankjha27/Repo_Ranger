@@ -5,10 +5,9 @@ edition         = "2021"
 
 [lib]
 name            = "repo_ranger_core"
-crate-type      = ["cdylib", "rlib"]
+crate-type      = ["rlib"]
 
 [dependencies]
-pyo3               = { version = "0.29", features = ["extension-module"] }
 flate2             = "1.0"
 tar                = "0.4"
 blake3             = "1.5"

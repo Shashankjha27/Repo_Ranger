@@ -1,5 +1,6 @@
 [workspace]
 resolver = "2"
-members  = [
+members = [
     "crates/repo_ranger_core",
+    "crates/repo_ranger_py",
 ]

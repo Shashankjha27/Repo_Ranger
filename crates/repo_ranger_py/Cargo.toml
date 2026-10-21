@@ -1,0 +1,12 @@
+[package]
+name        = "repo_ranger_py"
+version     = "0.1.0"
+edition     = "2021"
+
+[lib]
+name        = "repo_ranger_py"
+crate-type  = ["cdylib", "rlib"]
+
+[dependencies]
+repo_ranger_core = { path = "../repo_ranger_core" }
+pyo3             = { version = "0.29", features = ["extension-module"] }
