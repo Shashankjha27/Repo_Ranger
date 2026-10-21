@@ -1,4 +1,4 @@
-import repo_ranger_core as rrc
+import repo_ranger_py as rrc
 
 
 def test_merkle_bindings():

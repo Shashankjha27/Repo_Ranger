@@ -413,7 +413,6 @@ version = "0.1.0"
 dependencies = [
  "blake3",
  "flate2",
- "pyo3",
  "rayon",
  "rusqlite",
  "sysinfo",
@@ -428,6 +427,14 @@ dependencies = [
  "tree-sitter-python",
  "tree-sitter-rust",
  "tree-sitter-typescript",
+]
+
+[[package]]
+name = "repo_ranger_py"
+version = "0.1.0"
+dependencies = [
+ "pyo3",
+ "repo_ranger_core",
 ]
 
 [[package]]

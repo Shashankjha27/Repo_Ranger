@@ -3,7 +3,7 @@ from collections.abc import AsyncIterator
 from pathlib import Path
 from typing import Any
 
-import repo_ranger_core as rrc
+import repo_ranger_py as rrc
 
 from repo_ranger.llm.budget import ContextBudget, assert_airgap_compliance
 from repo_ranger.llm.gateway import AIGateway
