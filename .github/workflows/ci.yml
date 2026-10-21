@@ -35,19 +35,42 @@ jobs:
       - uses: Swatinem/rust-cache@v2
       - run: cargo clippy --workspace --all-targets --all-features -- -D warnings
 
-  test:
-    name: Test (${{ matrix.os }})
+  test-native:
+    name: Test-native (${{ matrix.os }})
     runs-on: ${{ matrix.os }}
     strategy:
       fail-fast: false
       matrix:
-        os: [ubuntu-latest]
+        os: [ubuntu-latest, macos-latest, windows-latest]
     steps:
       - uses: actions/checkout@v4
       - uses: dtolnay/rust-toolchain@stable
       - uses: Swatinem/rust-cache@v2
         with:
           key: ${{ matrix.os }}
+      - run: cargo test --workspace --verbose
+
+  test-containers:
+    name: Test-containers (${{ matrix.distro.name }})
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        distro:
+          - name: "Fedora Latest"
+            image: "fedora:latest"
+            prepare: "dnf -y update && dnf -y install gcc gcc-c++ git curl openssl-devel python3-devel cargo rust"
+          - name: "Arch Latest"
+            image: "archlinux:base-devel"
+            prepare: "pacman -Sy --noconfirm archlinux-keyring && pacman -Syu --noconfirm rust cargo python git gcc clang"
+    container:
+      image: ${{ matrix.distro.image }}
+  
+    steps:
+      - run: ${{ matrix.distro.prepare}}
+      - name: Configure Git Safe Directory
+        run: git config --global --add safe.directory "*"
+      - uses: actions/checkout@v4
       - run: cargo test --workspace --verbose
 
   pyo3-build:
@@ -64,4 +87,8 @@ jobs:
         uses: PyO3/maturin-action@v1
         with:
           command: build
-          args: --manifest-path crates/repo_ranger_core/Cargo.toml --out dist
+          args: --manifest-path crates/repo_ranger_py/Cargo.toml --out dist
+      - name: Install Wheel and Run Pytest
+        run: |
+          pip install dist/*.whl pytest httpx anyio
+          PYTHONPATH=. pytest test/
