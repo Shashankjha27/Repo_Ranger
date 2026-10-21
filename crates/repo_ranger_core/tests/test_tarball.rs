@@ -159,3 +159,31 @@ fn test_early_exit_on_callback_error() {
     assert!(result.is_err());
     assert_eq!(call_count.load(Ordering::SeqCst), 1);
 }
+
+#[test]
+fn test_path_normalization_canonical_forward_slashes() {
+    let mut encoder = GzEncoder::new(Vec::new(), Compression::default());
+    {
+        let mut builder = Builder::new(&mut encoder);
+        let content = b"fn main() {}";
+        let mut header = Header::new_gnu();
+        header.set_size(content.len() as u64);
+        header.set_mode(0o644);
+        header.set_cksum();
+        builder
+            .append_data(
+                &mut header,
+                "project-root/nested/dir/module.rs",
+                content.as_slice(),
+            )
+            .expect("Failed to append test file");
+        builder.finish().expect("Failed to finish tar archive");
+    }
+    let tar_gz_bytes = encoder.finish().expect("Failed to finish gzip encoder");
+
+    let extracted = extract_tarball_in_memory(&tar_gz_bytes).expect("Decompression failed");
+    assert_eq!(extracted.len(), 1);
+    assert_eq!(extracted[0].path, "nested/dir/module.rs");
+    assert!(!extracted[0].path.contains('\\'), "Path must not contain backslashes");
+}
+

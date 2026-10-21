@@ -90,7 +90,7 @@ where
         let path_str = stripped_path
             .to_str()
             .ok_or_else(|| TarballError::InvalidPath(stripped_path.to_string_lossy().to_string()))?
-            .to_string();
+            .replace('\\', "/");
 
         buf.clear();
         entry.read_to_end(&mut buf)?;
